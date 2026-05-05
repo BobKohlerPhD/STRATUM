@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 
 # Set up logging for FHIR Ingestion
-logger = logging.getLogger("IMDA-FHIR")
+logger = logging.getLogger("STRATUM-FHIR")
 
 def extract_patient_info(bundle):
     """Extracts basic patient identifiers from a FHIR bundle."""
@@ -37,7 +37,7 @@ def extract_observations(bundle):
     return observations
 
 def main():
-    parser = argparse.ArgumentParser(description="IMDA FHIR Harmonization Engine")
+    parser = argparse.ArgumentParser(description="STRATUM FHIR Harmonization Engine")
     parser.add_argument("bundle_json", help="Path to the FHIR Bundle JSON file.")
     parser.add_argument("--registry", default="clinical_registry_master.csv", help="Master Registry for mapping.")
     parser.add_argument("--output", default="harmonized_clinical_records.csv", help="Output CSV path.")
@@ -61,7 +61,7 @@ def main():
     observations = extract_observations(bundle)
     print(f" - Found {len(observations)} Observation resources.")
 
-    # Mapping to IMDA Registry
+    # Mapping to STRATUM Registry
     # (Simplified: in a real system, we would have a lookup table for LOINC -> generalized_name)
     data_rows = []
     
@@ -93,7 +93,7 @@ def main():
     # Convert to DataFrame
     df_harmonized = pd.DataFrame(data_rows)
     
-    # Pivot data so each variable is a column (standard IMDA silver-tier format)
+    # Pivot data so each variable is a column (standard STRATUM silver-tier format)
     df_pivot = df_harmonized.pivot(index='timestamp', columns='original_variable_name', values='value').reset_index()
     df_pivot['participant_id'] = subject_id
 

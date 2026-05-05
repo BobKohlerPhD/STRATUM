@@ -24,7 +24,7 @@ class NibabelConverter(BaseConverter):
                 "Dim3": int(header.get_data_shape()[2]),
                 "SliceThickness": float(header.get_zooms()[2]),
                 "MRAcquisitionType": "3D" if len(header.get_data_shape()) > 2 else "2D",
-                "ConversionTool": "Nibabel-IMDA"
+                "ConversionTool": "Nibabel-STRATUM"
             }
             
             # Save as JSON sidecar in the requested output directory

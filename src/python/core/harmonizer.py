@@ -6,11 +6,11 @@ from pathlib import Path
 class BaseHarmonizer(ABC):
     """
     Abstract Base Class for all modality-specific harmonizers.
-    Part of the IMDA skeletal architecture.
+    Part of the STRATUM skeletal architecture.
     """
     def __init__(self, registry_path: Path):
         self.registry_path = registry_path
-        self.logger = logging.getLogger(f"IMDA-{self.__class__.__name__}")
+        self.logger = logging.getLogger(f"STRATUM-{self.__class__.__name__}")
         self.registry = self._load_registry()
 
     def _load_registry(self):
@@ -27,7 +27,7 @@ class BaseHarmonizer(ABC):
 
     @abstractmethod
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Map raw data to the IMDA registry schema."""
+        """Map raw data to the STRATUM registry schema."""
         pass
 
     def run(self, source_path: Path, output_path: Path):

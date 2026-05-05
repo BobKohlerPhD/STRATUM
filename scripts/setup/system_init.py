@@ -3,10 +3,13 @@ import sys
 import subprocess
 from pathlib import Path
 
-# Add src to path
-sys.path.append(str(Path(__file__).parent.resolve()))
+# Add project root and src to path
+# This script is now in scripts/setup/system_init.py
+SCRIPT_DIR = Path(__file__).parent.resolve()
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+sys.path.append(str(PROJECT_ROOT))
 
-from src.python.core.engine import IMDAEngine
+from src.python.core.engine import StratumEngine
 from src.python.plugins.imaging_bids import BIDSHarmonizer
 from src.python.plugins.converter_nibabel import NibabelConverter
 from src.python.plugins.multi_omics import MultiOmicsHarmonizer
@@ -17,9 +20,8 @@ from src.python.plugins.clinical_nlp import ClinicalNLPHarmonizer
 from src.python.plugins.fmri_nilearn import fMRINilearnHarmonizer
 
 def main():
-    print("=== IMDA Architecture: Federated Multi-Modal Data Engine ===")
-    root = Path(__file__).parent.resolve()
-    engine = IMDAEngine(root)
+    print("=== STRATUM Architecture: Federated Multi-Modal Data Engine ===")
+    engine = StratumEngine(PROJECT_ROOT)
     
     # Register Plugins & Converters
     engine.register_plugin("bids", BIDSHarmonizer)
@@ -32,9 +34,13 @@ def main():
     engine.register_converter(".nii", NibabelConverter())
 
     # Create samples if missing
-    if not (root / "data" / "bronze" / "genomics" / "sub-001_variants.csv").exists():
+    gen_dir = PROJECT_ROOT / "scripts" / "generators"
+    if not (PROJECT_ROOT / "data" / "bronze" / "genomics" / "sub-001_variants.csv").exists():
         try:
-            subprocess.run(["python3", "create_omics_samples.py"], check=True)
+            print(">>> Generating Synthetic Sample Data...")
+            # Run generators from their new location
+            for gen_script in gen_dir.glob("create_*.py"):
+                subprocess.run(["python3", str(gen_script)], check=True, cwd=PROJECT_ROOT)
         except Exception as e:
             print(f"Sample generation failed: {e}")
 
@@ -54,7 +60,7 @@ def main():
     engine.batch_process(tasks)
 
     print("\n>>> Synchronizing Silver Tiers...")
-    silver_files = list((root / "data" / "silver").glob("harmonized_sub-001*.csv"))
+    silver_files = list((PROJECT_ROOT / "data" / "silver").glob("harmonized_sub-001*.csv"))
     for f in silver_files:
         print(f" - Found Silver Asset: {f.name}")
         

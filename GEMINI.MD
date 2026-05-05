@@ -1,8 +1,8 @@
-# IMDA: Integrated Medical Data Architecture
+# STRATUM: Agent-driven orchestration of multimodal clinical data
 ## Agentic Interface and Orchestration Protocol v2.6
 
 ### Abstract
-The IMDA-Agent-Interface defines the operational parameters, privacy constraints, and architectural standards for the Integrated Medical Data Architecture. It serves as the primary technical interface and behavioral blueprint for Large Language Model (LLM) agents operating within this framework.
+The STRATUM-Agent-Interface defines the operational parameters, privacy constraints, and architectural standards for STRATUM (Agent-driven orchestration of multimodal clinical data). It serves as the primary technical interface and behavioral blueprint for Large Language Model (LLM) agents operating within this framework.
 
 ---
 
@@ -36,7 +36,7 @@ The IMDA-Agent-Interface defines the operational parameters, privacy constraints
 ### Chain-of-Thought (CoT)
 Agents MUST employ a `<thinking>` block for all data transformations to map symbols, assess re-identification risk, and formulate lazy-loading strategies.
 
-### MCP Server Tooling (imda_server.py)
+### MCP Server Tooling (stratum_server.py)
 The following operations are exposed as native tools for the agent:
 *   **check_registry_integrity**: Automated verification of the Master Clinical Registry.
 *   **generate_synthetic_cohort**: High-fidelity orchestration of synthetic digital twins.
@@ -51,7 +51,7 @@ The following operations are exposed as native tools for the agent:
 2. **EVALUATE**: Design a transformation path ensuring schema alignment.
 3. **ACT**: Execute the transformation using async MCP tools.
 4. **VERIFY**: Run `check_registry_integrity` to ensure zero schema drift.
-5. **LOG**: Automatically record every action in the `imda_audit.log` for clinical traceability.
+5. **LOG**: Automatically record every action in the `stratum_audit.log` for clinical traceability.
 
 ---
 **Repository**: [Link Restricted]

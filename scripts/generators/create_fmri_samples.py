@@ -24,5 +24,5 @@ def create_4d_fmri(path: Path):
 if __name__ == "__main__":
     bronze_imaging = Path("data/bronze/imaging")
     bronze_imaging.mkdir(parents=True, exist_ok=True)
-    # Saving as .nii.gz to bypass the IMDA Nibabel Structural Converter 
+    # Saving as .nii.gz to bypass the STRATUM Nibabel Structural Converter 
     create_4d_fmri(bronze_imaging / "sub-001_ses-01_task-rest_bold.nii.gz")

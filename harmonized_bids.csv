@@ -1,6 +1,0 @@
-timestamp,AcquisitionTime,EchoTime,MagneticFieldStrength,Manufacturer,RepetitionTime,participant_id
-2026-04-16T14:26:23.416063,,,3,,,sub-001
-2026-04-16T14:26:23.416079,,,,Siemens,,sub-001
-2026-04-16T14:26:23.416084,14:20:30.000000,,,,,sub-001
-2026-04-16T14:26:23.416087,,0.03,,,,sub-001
-2026-04-16T14:26:23.416092,,,,,2.0,sub-001

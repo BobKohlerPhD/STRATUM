@@ -1,12 +1,18 @@
 import pandas as pd
 import json
-import argparse
-import os
+from typing import List, Dict, Any
 
-def suggest_metadata(file_path, sample_rows=5):
+def suggest_metadata(file_path: str, sample_rows: int = 5) -> List[Dict[str, Any]]:
     """
     Analyzes a raw data file and generates a skeleton for the clinical_registry_master.csv.
     In a real-world scenario, this would be passed to an LLM to refine the generalized names.
+    
+    Args:
+        file_path (str): Path to the raw CSV file.
+        sample_rows (int): Number of rows to analyze.
+        
+    Returns:
+        List[Dict[str, Any]]: A list of metadata suggestion dictionaries.
     """
     try:
         # Read only a few rows to analyze structure
@@ -34,12 +40,5 @@ def suggest_metadata(file_path, sample_rows=5):
 
         return suggestions
     except Exception as e:
-        return {"error": str(e)}
+        return [{"error": str(e)}]
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Suggest metadata for raw clinical data.")
-    parser.add_argument("file_path", help="Path to the raw CSV file.")
-    args = parser.parse_args()
-
-    result = suggest_metadata(args.file_path)
-    print(json.dumps(result, indent=2))

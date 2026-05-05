@@ -57,7 +57,7 @@ def main():
     run_step("VERIFY (Registry Summary)", ["python3", "src/python/data_dictionary/check_datadictionary_summary.py"])
 
     print("\n" + "="*40)
-    print("IMDA PIPELINE COMPLETE: Gold Tier Data Ready.")
+    print("STRATUM PIPELINE COMPLETE: Gold Tier Data Ready.")
     print("="*40)
 
 if __name__ == "__main__":

@@ -5,5 +5,5 @@
     "Dim3": 32,
     "SliceThickness": 1.0,
     "MRAcquisitionType": "3D",
-    "ConversionTool": "Nibabel-IMDA"
+    "ConversionTool": "Nibabel-STRATUM"
 }

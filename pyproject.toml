@@ -1,9 +1,9 @@
 [project]
-name = "imda-agent-interface"
+name = "stratum-agent-interface"
 version = "0.1.0"
-description = "Integrated Medical Data Architecture (IMDA) MCP Server for multi-modal clinical data orchestration."
+description = "STRATUM: Agent-driven orchestration of multimodal clinical data (MCP Server)."
 authors = [
-    { name = "IMDA Contributors" }
+    { name = "STRATUM Contributors" }
 ]
 dependencies = [
     "mcp>=1.2.0",
@@ -12,7 +12,7 @@ dependencies = [
 requires-python = ">=3.11"
 
 [project.scripts]
-imda-server = "imda_server:mcp.run"
+stratum-server = "stratum_server:mcp.run"
 
 [build-system]
 requires = ["hatchling"]

@@ -6,9 +6,9 @@ from typing import Dict, Type, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from src.python.core.harmonizer import BaseHarmonizer
 
-class IMDAEngine:
+class StratumEngine:
     """
-    The central orchestration engine for the IMDA skeletal architecture.
+    The central orchestration engine for the STRATUM skeletal architecture.
     Manages data transition from Bronze -> Silver -> Gold tiers.
     """
     def __init__(self, project_root: Path):
@@ -18,7 +18,7 @@ class IMDAEngine:
         self.gold_dir = project_root / "data" / "gold"
         self.registry_path = project_root / "clinical_registry_master.csv"
         
-        self.logger = logging.getLogger("IMDA-Engine")
+        self.logger = logging.getLogger("STRATUM-Engine")
         self._plugins: Dict[str, BaseHarmonizer] = {}
         self._converters: Dict[str, any] = {} # Mapping extension -> converter
 

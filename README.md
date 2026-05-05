@@ -1,10 +1,52 @@
-# Integrated Medical Data Architecture (IMDA)
-*still a work in progress* 
-The Integrated Medical Data Architecture (IMDA) is a multi-modal clinical data processing pipeline that helps address constraints inherent in large cohort research and data collection. 
+# STRATUM: Agent-driven orchestration of multimodal clinical data
+
+The STRATUM architecture is a multi-modal clinical data processing pipeline that helps address constraints inherent in large cohort research and data collection.
+## Workflow Schematic
+
+![STRATUM Orchestration Workflow](workflow_schematic.svg)
+
+*(Note: If the diagram above does not render in your current viewer, you can open [workflow_schematic.svg](./workflow_schematic.svg) directly in any web browser.)*
+
+```mermaid
+graph TD
+...
+    subgraph "AI Interaction Layer"
+        User((User/Researcher)) <--> Client[AI Client: Claude / Gemini]
+        Client <-- "Model Context Protocol (MCP)" --> Server[FastMCP: STRATUM Orchestrator]
+    end
+
+    subgraph "Orchestration Engine"
+        Server --> Engine[STRATUM Core Engine]
+        Engine --> Registry[(Master Clinical Registry)]
+    end
+
+    subgraph "Multi-Modal Ingestion & Harmonization"
+        Engine -- "Process" --> Plugins{Modality Plugins}
+        Plugins --> BIDS[Neuroimaging / BIDS]
+        Plugins --> Omics[Multi-Omics]
+        Plugins --> Wear[Wearables / IoT]
+        Plugins --> NLP[Clinical NLP]
+        Plugins --> Bio[Biospecimens]
+    end
+
+    subgraph "Medallion Data Tiers"
+        Bronze[Bronze: Raw Ingestion] -- "Validation" --> Silver[Silver: Harmonized Assets]
+        Silver -- "Longitudinal Join + Hashing" --> Gold[Gold: Analytic Cohort]
+    end
+
+    %% Flow connections
+    BIDS & Omics & Wear & NLP & Bio -.-> Bronze
+    Bronze ==> Silver
+    Silver ==> Gold
+
+    style Gold fill:#f9f,stroke:#333,stroke-width:4px
+    style Registry fill:#fff,stroke:#333,stroke-dasharray: 5 5
+    style Server fill:#bbf,stroke:#333,stroke-width:2px
+```
 
 ## Data Types and General Information
-
-IMDA is an object oriented pipeline (`IMDAEngine`) with the following architecture:
+...
+STRATUM is an object oriented pipeline (`StratumEngine`) with the following architecture:
 
 *   **Bronze Tier (Raw Ingestion)**: NIfTI, DICOM, fastq-derived CSVs, REDCap exports, raw wearable JSONs
 *   **Silver Tier (Harmonization)**: Zero-trust schema mapping executed via isolated plugins. Domain-specific metrics are mathematically validated against the `clinical_registry_master`, uniformity across sites.
@@ -24,37 +66,78 @@ The architecture handles data processing through high-efficiency batching, allow
 
 ---
 
-## Privacy
+## Synthetic Digital Twins (The "Cold Start" Protocol)
 
+Medical data is inherently restricted. To ensure this project is "FAIR" (Findable, Accessible, Interoperable, and Reusable) and respects the **Zero-PHI** mandate, STRATUM utilizes high-fidelity **Synthetic Data Generators**.
+
+*   **Privacy-First Development**: Allows researchers to build and stress-test the pipeline without ever touching sensitive patient records.
+*   **Zero-Friction Ingestion**: New users can instantly populate the Bronze Tier with "Digital Twins" of fMRI, Omics, and EHR data to see the Medallion flow in action.
+*   **Validation Benchmarking**: Generates complex edge cases (e.g., malformed NIfTI headers or truncated genomic variants) to verify the robustness of the plugin logic.
+
+---
+
+## Privacy
+...
 Clinical environments operate under compliance constraints (HIPAA, GDPR, EU AI Act).
 
-During the generation of the Gold Tier data object, IMDA uses W3C-PROV Compliant Routines to append unique SHA-256 hashes to every row-wise entries. This enforces granular tracking, ensuring every tensor utilized directly connects to a raw data asset. Any variable undetected within the schema registry is automatically removed, helping prevent unapproved PHI from getting into the pipeline
+During the generation of the Gold Tier data object, STRATUM uses W3C-PROV Compliant Routines to append unique SHA-256 hashes to every row-wise entries. This enforces granular tracking, ensuring every tensor utilized directly connects to a raw data asset. Any variable undetected within the schema registry is automatically removed, helping prevent unapproved PHI from getting into the pipeline
 ---
 
 ## MCP Protocol
 
 ### Connecting to an LLM
-To expose IMDA to an LLM (i.e., claude, gemini), you can run the server via `fastmcp`:
+The STRATUM Orchestrator is built using **FastMCP**. For the most reliable experience and automatic dependency management, it is recommended to run the server using **`uv`**.
 
-1.  **Start MCP Server**:
+1.  **Install `uv`** (if not already installed):
     ```bash
-    fastmcp run imda_server.py
+    curl -LsSf https://astral.sh/uv/install.sh | sh
     ```
-    *(Alternatively, run it dynamically within your agent's config using `python3 imda_server.py` via standard input/output).*
 
-2.  **LLM Interaction**:
-    Once attached, LLM will automatically index IMDA's tools such as:
-    *   `process_imaging_metadata`: Point the agent to raw `.nii.gz` files to extract 4D BOLD signals natively.
-    *   `check_registry_integrity`: Let the agent verify the gold tier schema without writing code.
-    *   `generate_synthetic_cohort`: Have the agent mimic the privacy-redacted patient data perfectly for testing.
+2.  **Run the Server**:
+    You can run the server directly or configure it in your AI client (like Claude Desktop or Cursor).
+    ```bash
+    uv run --with fastmcp python stratum_server.py
+    ```
 
-Allows LLM to act as a fully functioning pipeline for updating registries and pipelining raw input data via standard prompting.
+3.  **Configuring Claude Desktop**:
+    Add the following to your `claude_desktop_config.json`:
+    ```json
+    {
+      "mcpServers": {
+        "stratum": {
+          "command": "uv",
+          "args": [
+            "run",
+            "--with",
+            "fastmcp",
+            "python",
+            "/absolute/path/to/stratum_server.py"
+          ]
+        }
+      }
+    }
+    ```
+
+### LLM Interaction
+Once attached, the LLM will automatically index STRATUM's multi-modal tools, including:
+*   `process_imaging` / `process_omics` / `process_wearables`: Orchestrate ingestion for specific modalities.
+*   `generate_gold_tier`: Trigger the final multi-modal longitudinal merge.
+*   `check_registry_integrity`: Verify the Master Clinical Registry for schema drift.
+*   `generate_synthetic_cohort`: Create high-fidelity digital twins for simulation.
 
 ---
 
 ## To run
 
+To initialize the environment and process the sample datasets, run the setup script:
+
 ```bash
-python3 system_init.py
+python3 scripts/setup/system_init.py
 ```
+
+This will:
+1. Generate synthetic multi-modal sample data in the `data/bronze` tier.
+2. Register the clinical plugins and NIfTI converters.
+3. Batch process the data into the `data/silver` tier.
+4. Perform the final longitudinal merge into the `data/gold` tier.
 

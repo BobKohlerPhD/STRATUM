@@ -7,12 +7,12 @@ import re
 import logging
 
 # Configure local logging for privacy transformations
-logger = logging.getLogger("IMDA-Privacy")
+logger = logging.getLogger("STRATUM-Privacy")
 
 def apply_differential_privacy(series, epsilon=0.1):
     """
     Applies Laplacian noise to a numerical series for differential privacy.
-    (Simplified for demonstration as part of the IMDA SOTA Blueprint)
+    (Simplified for demonstration as part of the STRATUM SOTA Blueprint)
     """
     sensitivity = series.max() - series.min()
     if sensitivity == 0:
@@ -23,7 +23,7 @@ def apply_differential_privacy(series, epsilon=0.1):
     return series + noise
 
 def redact_column(series, datatype):
-    """Redacts PII/PHI based on the IMDA metadata specification."""
+    """Redacts PII/PHI based on the STRATUM metadata specification."""
     if datatype == 'pii_name':
         return series.apply(lambda x: "[REDACTED NAME]")
     elif datatype == 'pii_date':
@@ -33,7 +33,7 @@ def redact_column(series, datatype):
     return series
 
 def main():
-    parser = argparse.ArgumentParser(description="IMDA Privacy-Enhancing Redaction Tool")
+    parser = argparse.ArgumentParser(description="STRATUM Privacy-Enhancing Redaction Tool")
     parser.add_argument("input_csv", help="Path to the raw CSV data.")
     parser.add_argument("--registry", default="clinical_registry_master.csv", help="Path to the master registry.")
     parser.add_argument("--epsilon", type=float, default=0.1, help="Privacy budget for DP.")

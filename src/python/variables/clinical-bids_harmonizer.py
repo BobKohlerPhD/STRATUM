@@ -6,10 +6,10 @@ import logging
 from datetime import datetime
 
 # Set up logging for BIDS Ingestion
-logger = logging.getLogger("IMDA-BIDS")
+logger = logging.getLogger("STRATUM-BIDS")
 
 def main():
-    parser = argparse.ArgumentParser(description="IMDA BIDS Harmonization Engine")
+    parser = argparse.ArgumentParser(description="STRATUM BIDS Harmonization Engine")
     parser.add_argument("sidecar_json", help="Path to the BIDS sidecar JSON file.")
     parser.add_argument("--registry", default="clinical_registry_master.csv", help="Master Registry for mapping.")
     parser.add_argument("--output", default="harmonized_bids_records.csv", help="Output CSV path.")
