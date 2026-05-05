@@ -7,42 +7,24 @@ The STRATUM architecture is a multi-modal clinical data processing pipeline that
 
 *(Note: If the diagram above does not render in your current viewer, you can open [workflow_schematic.svg](./workflow_schematic.svg) directly in any web browser.)*
 
-```mermaid
-graph TD
+### Logical Data Flow
+![STRATUM Logical Flow](logic_flow.svg)
+
+## Architecture Overview
 ...
-    subgraph "AI Interaction Layer"
-        User((User/Researcher)) <--> Client[AI Client: Claude / Gemini]
-        Client <-- "Model Context Protocol (MCP)" --> Server[FastMCP: STRATUM Orchestrator]
-    end
+The STRATUM architecture is built on a high-performance orchestration layer that connects clinical researchers with deep-learning-ready data objects.
 
-    subgraph "Orchestration Engine"
-        Server --> Engine[STRATUM Core Engine]
-        Engine --> Registry[(Master Clinical Registry)]
-    end
+### 1. AI Interaction Layer
+Researchers interact with the pipeline via an **AI Orchestrator** (Claude or Gemini) using the **Model Context Protocol (MCP)**. This allows for natural language data discovery and automated tool execution.
 
-    subgraph "Multi-Modal Ingestion & Harmonization"
-        Engine -- "Process" --> Plugins{Modality Plugins}
-        Plugins --> BIDS[Neuroimaging / BIDS]
-        Plugins --> Omics[Multi-Omics]
-        Plugins --> Wear[Wearables / IoT]
-        Plugins --> NLP[Clinical NLP]
-        Plugins --> Bio[Biospecimens]
-    end
+### 2. STRATUM Core Engine
+The `StratumEngine` manages the zero-trust transition of data across the Medallion tiers, coordinating with modality-specific plugins for Neuroimaging, Multi-Omics, and Wearables.
 
-    subgraph "Medallion Data Tiers"
-        Bronze[Bronze: Raw Ingestion] -- "Validation" --> Silver[Silver: Harmonized Assets]
-        Silver -- "Longitudinal Join + Hashing" --> Gold[Gold: Analytic Cohort]
-    end
+### 3. Medallion Data Tiers
+*   **Bronze (Source)**: Immutable, de-identified raw clinical inputs.
+*   **Silver (Harmonized)**: Domain-specific metrics mathematically validated against the `clinical_registry_master`.
+*   **Gold (Analytics)**: High-dimensional, longitudinal cohorts ready for publication-grade analysis.
 
-    %% Flow connections
-    BIDS & Omics & Wear & NLP & Bio -.-> Bronze
-    Bronze ==> Silver
-    Silver ==> Gold
-
-    style Gold fill:#f9f,stroke:#333,stroke-width:4px
-    style Registry fill:#fff,stroke:#333,stroke-dasharray: 5 5
-    style Server fill:#bbf,stroke:#333,stroke-width:2px
-```
 
 ## Data Types and General Information
 ...
