@@ -7,8 +7,6 @@ The STRATUM architecture is a multi-modal clinical data processing pipeline that
 
 *(Note: If the diagram above does not render in your current viewer, you can open [workflow_schematic.svg](./workflow_schematic.svg) directly in any web browser.)*
 
-### Logical Data Flow
-![STRATUM Logical Flow](logic_flow.svg)
 
 ## Architecture Overview
 ...
