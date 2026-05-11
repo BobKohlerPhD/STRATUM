@@ -12,12 +12,13 @@ ENV/
 env.bak/
 venv.bak/
 
-# STRATUM Data Tiers (Do not commit patient data or test data)
+# STRATUM Data Tiers (Sensitive patient or test data)
 data/bronze/
 data/silver/
 data/gold/
+clinical_registry_master.csv
 
-# Ignore specific modality data directories just in case
+# Ignore specific modality data directories
 data/**/*.nii
 data/**/*.nii.gz
 data/**/*.edf
@@ -41,14 +42,13 @@ ehthumbs.db
 Thumbs.db
 
 # AI & Agent Artifacts
+.claude/
 .claude*
-.gemini*
 .gemini/
+.gemini*
 GEMINI.MD
 gemini.md
 NEXT_STEPS.md
-
-
 
 # Visualization, Schematics & Scripts
 *.svg
@@ -60,4 +60,6 @@ NEXT_STEPS.md
 *visualization*
 generate_diagrams.py
 charts/
+
+# Legacy
 legacy/
