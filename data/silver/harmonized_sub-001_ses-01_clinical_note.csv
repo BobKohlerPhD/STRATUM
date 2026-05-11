@@ -1,2 +1,0 @@
-visit_session,clinical_note,extracted_snomed,modality_category
-ses-01,Patient presents with acute anxiety and severe chronic insomnia. Vitals normal.,SNOMED:193462001;SNOMED:197480006,unstructured_clinical_nlp

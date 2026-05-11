@@ -1,45 +1,62 @@
-original_variable_name,generalized_variable_name,datatype,levels
-subject_id,participant_id,nominal,[]
-age_at_scan,subject_age_years,ratio,[]
-biological_sex,subject_sex,nominal,"[""1 = Male"", ""2 = Female""]"
-diagnosis_code,clinical_diagnosis,nominal,"[""0 = Control"", ""1 = Patient""]"
-fmri_amplitude,fMRI_mean_activation,ratio,[]
-cortical_thickness,structural_thickness_mm,ratio,[]
-high_priority_flag,priority_status,ordinal,"[""1 = Low"", ""2 = Medium"", ""3 = High""]"
-patient_name,subject_name,pii_name,[]
-date_of_birth,subject_dob,pii_date,[]
-MagneticFieldStrength,mri_field_strength_tesla,ratio,[]
-RepetitionTime,mri_repetition_time_sec,ratio,[]
-EchoTime,mri_echo_time_sec,ratio,[]
-Manufacturer,mri_manufacturer,nominal,[]
-AcquisitionTime,scan_acquisition_time,pii_date,[]
-MRAcquisitionType,mri_acquisition_dimension,nominal,"[""2D"", ""3D""]"
-ScanningSequence,mri_sequence_type,nominal,[]
-FlipAngle,mri_flip_angle_deg,ratio,[]
-SliceThickness,mri_slice_thickness_mm,ratio,[]
-PhaseEncodingDirection,mri_phase_encoding_dir,nominal,[]
-EffectiveEchoSpacing,mri_echo_spacing_sec,ratio,[]
-TotalReadoutTime,mri_total_readout_sec,ratio,[]
-MetaboliteNAA,mrs_naa_concentration,ratio,[]
-MetaboliteCho,mrs_choline_concentration,ratio,[]
-MetaboliteCr,mrs_creatine_concentration,ratio,[]
-MetaboliteSNR,mrs_signal_noise_ratio,ratio,[]
-rsid,genetic_variant_id,nominal,[]
-genotype,genetic_variant_value,nominal,"[""0/0"", ""0/1"", ""1/1""]"
-protein_id,uniprot_protein_id,nominal,[]
-abundance_level,protein_abundance_zscore,ratio,[]
-metabolite_name,chemical_metabolite_id,nominal,[]
-concentration_value,metabolite_concentration_umol,ratio,[]
-survey_name,assessment_instrument_name,nominal,[]
-phq9_total,survey_phq9_score,ratio,[]
-gad7_total,survey_gad7_score,ratio,[]
-specimen_type,biospecimen_material_type,nominal,"[""blood"", ""saliva"", ""urine"", ""csf""]"
-blood_wbc,biospecimen_wbc_count,ratio,[]
-saliva_cortisol,biospecimen_cortisol_level_nmol,ratio,[]
-collection_time,biospecimen_collection_datetime,pii_date,[]
-device_brand,wearable_device_name,nominal,"[""apple_watch"", ""fitbit"", ""actigraph""]"
-mean_hr,wearable_mean_resting_hr_bpm,ratio,[]
-sleep_efficiency,wearable_sleep_efficiency_pct,ratio,[]
-clinical_note,raw_unstructured_clinical_note,pii_note,[]
-extracted_snomed,nlp_extracted_snomed_ct,nominal,[]
-visit_session,temporal_visit_session_id,nominal,[]
+original_variable_name,bids_standard_name,datatype,levels,is_bids
+subject_id,participant_id,nominal,[],false
+age_at_scan,age,ratio,[],false
+biological_sex,sex,nominal,"[""1 = Male"", ""2 = Female""]",false
+diagnosis_code,diagnosis,nominal,"[""0 = Control"", ""1 = Patient""]",false
+fmri_amplitude,fmri_amplitude,ratio,[],false
+cortical_thickness,cortical_thickness,ratio,[],false
+high_priority_flag,priority_status,ordinal,"[""1 = Low"", ""2 = Medium"", ""3 = High""]",false
+patient_name,patient_name,pii_name,[],false
+date_of_birth,date_of_birth,pii_date,[],false
+MagneticFieldStrength,MagneticFieldStrength,ratio,[],true
+RepetitionTime,RepetitionTime,ratio,[],true
+EchoTime,EchoTime,ratio,[],true
+Manufacturer,Manufacturer,nominal,[],true
+AcquisitionTime,AcquisitionTime,pii_date,[],true
+MRAcquisitionType,MRAcquisitionType,nominal,"[""2D"", ""3D""]",true
+ScanningSequence,ScanningSequence,nominal,[],true
+FlipAngle,FlipAngle,ratio,[],true
+SliceThickness,SliceThickness,ratio,[],true
+PhaseEncodingDirection,PhaseEncodingDirection,nominal,[],true
+EffectiveEchoSpacing,EffectiveEchoSpacing,ratio,[],true
+TotalReadoutTime,TotalReadoutTime,ratio,[],true
+SeriesDescription,SeriesDescription,nominal,[],true
+MetaboliteNAA,MetaboliteNAA,ratio,[],false
+MetaboliteCho,MetaboliteCho,ratio,[],false
+MetaboliteCr,MetaboliteCr,ratio,[],false
+MetaboliteSNR,MetaboliteSNR,ratio,[],false
+rsid,rsid,nominal,[],false
+genotype,genotype,nominal,"[""0/0"", ""0/1"", ""1/1""]",false
+protein_id,protein_id,nominal,[],false
+abundance_level,abundance_level,ratio,[],false
+metabolite_name,metabolite_name,nominal,[],false
+concentration_value,concentration_value,ratio,[],false
+survey_name,survey_name,nominal,[],false
+phq9_total,phq9_total,ratio,[],false
+gad7_total,gad7_total,ratio,[],false
+specimen_type,specimen_type,nominal,"[""blood"", ""saliva"", ""urine"", ""csf""]",false
+blood_wbc,blood_wbc,ratio,[],false
+saliva_cortisol,saliva_cortisol,ratio,[],false
+collection_time,collection_time,pii_date,[],false
+device_brand,device_brand,nominal,"[""apple_watch"", ""fitbit"", ""actigraph""]",false
+mean_hr,mean_hr,ratio,[],false
+sleep_efficiency,sleep_efficiency,ratio,[],false
+clinical_note,clinical_note,pii_note,[],false
+extracted_snomed,extracted_snomed,nominal,[],false
+visit_session,visit_session,nominal,[],false
+SamplingFrequency,SamplingFrequency,ratio,[],true
+EEGChannelCount,EEGChannelCount,ratio,[],true
+EEGReference,EEGReference,nominal,[],true
+TaskName,TaskName,nominal,[],true
+PowerLineFrequency,PowerLineFrequency,ratio,[],true
+SoftwareFilters,SoftwareFilters,nominal,[],true
+RecordingDuration,RecordingDuration,ratio,[],true
+RecordingType,RecordingType,nominal,"[""continuous"", ""epoched""]",true
+EEGGround,EEGGround,nominal,[],true
+EEGPlacementScheme,EEGPlacementScheme,nominal,[],true
+EOGChannelCount,EOGChannelCount,ratio,[],true
+ECGChannelCount,ECGChannelCount,ratio,[],true
+EMGChannelCount,EMGChannelCount,ratio,[],true
+MiscChannelCount,MiscChannelCount,ratio,[],true
+TriggerChannelCount,TriggerChannelCount,ratio,[],true
+eeg_amplitude,eeg_amplitude,ratio,[],false

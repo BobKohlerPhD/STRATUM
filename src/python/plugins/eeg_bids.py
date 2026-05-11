@@ -3,10 +3,10 @@ import pandas as pd
 from pathlib import Path
 from src.python.core.harmonizer import BaseHarmonizer
 
-class BIDSHarmonizer(BaseHarmonizer):
+class EEGBIDSHarmonizer(BaseHarmonizer):
     """
-    BIDS-native plugin for MRI metadata harmonization.
-    Handles T1w (sMRI), DWI/DTI, MRS, and other MRI sidecar metadata (.json).
+    BIDS-native plugin for EEG metadata harmonization.
+    Handles EEG sidecar metadata (.json) in BIDS format.
     
     BIDS-First: ALL fields are preserved. BIDS field names are kept as-is
     since they ARE the standard. Any non-BIDS fields get prefixed with
@@ -15,7 +15,7 @@ class BIDSHarmonizer(BaseHarmonizer):
     
     def ingest(self, source_path: Path) -> pd.DataFrame:
         if not source_path.suffix == '.json':
-            self.logger.error("BIDS metadata expected in .json format.")
+            self.logger.error(f"EEG BIDS metadata expected in .json format, got {source_path.suffix}")
             return pd.DataFrame()
             
         with open(source_path, 'r') as f:
@@ -37,18 +37,7 @@ class BIDSHarmonizer(BaseHarmonizer):
         # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
         result = self.harmonize_columns(df)
         
-        # Infer MRI sub-modality from BIDS fields
-        modality = 'mri'
-        if 'SeriesDescription' in result.columns:
-            desc = str(result['SeriesDescription'].iloc[0]).lower()
-            if 't1' in desc:
-                modality = 'structural_mri'
-            elif 'bold' in desc or 'fmri' in desc:
-                modality = 'functional_mri'
-            elif 'dwi' in desc or 'diff' in desc or 'dti' in desc:
-                modality = 'diffusion_mri'
-            elif 'mrs' in desc or 'spec' in desc:
-                modality = 'magnetic_resonance_spectroscopy'
+        # Tag modality
+        result['modality_category'] = 'eeg'
         
-        result['modality_category'] = modality
         return result

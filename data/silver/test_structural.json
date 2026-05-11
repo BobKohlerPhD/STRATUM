@@ -1,9 +1,0 @@
-{
-    "SeriesDescription": "Converted from .nii",
-    "Dim1": 32,
-    "Dim2": 32,
-    "Dim3": 32,
-    "SliceThickness": 1.0,
-    "MRAcquisitionType": "3D",
-    "ConversionTool": "Nibabel-STRATUM"
-}

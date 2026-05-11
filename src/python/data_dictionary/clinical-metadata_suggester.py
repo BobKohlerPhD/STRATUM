@@ -5,7 +5,10 @@ from typing import List, Dict, Any
 def suggest_metadata(file_path: str, sample_rows: int = 5) -> List[Dict[str, Any]]:
     """
     Analyzes a raw data file and generates a skeleton for the clinical_registry_master.csv.
-    In a real-world scenario, this would be passed to an LLM to refine the generalized names.
+    
+    BIDS-First: If a column name matches a known BIDS field, it is flagged as
+    is_bids=true and the bids_standard_name is set to the original name.
+    Non-BIDS fields get a placeholder bids_standard_name for manual review.
     
     Args:
         file_path (str): Path to the raw CSV file.
@@ -14,6 +17,18 @@ def suggest_metadata(file_path: str, sample_rows: int = 5) -> List[Dict[str, Any
     Returns:
         List[Dict[str, Any]]: A list of metadata suggestion dictionaries.
     """
+    # Common BIDS fields across modalities
+    KNOWN_BIDS_FIELDS = {
+        'MagneticFieldStrength', 'RepetitionTime', 'EchoTime', 'Manufacturer',
+        'AcquisitionTime', 'MRAcquisitionType', 'ScanningSequence', 'FlipAngle',
+        'SliceThickness', 'PhaseEncodingDirection', 'EffectiveEchoSpacing',
+        'TotalReadoutTime', 'SeriesDescription', 'SamplingFrequency',
+        'EEGChannelCount', 'EEGReference', 'TaskName', 'PowerLineFrequency',
+        'SoftwareFilters', 'RecordingDuration', 'RecordingType', 'EEGGround',
+        'EEGPlacementScheme', 'EOGChannelCount', 'ECGChannelCount',
+        'EMGChannelCount', 'MiscChannelCount', 'TriggerChannelCount',
+    }
+
     try:
         # Read only a few rows to analyze structure
         df = pd.read_csv(file_path, nrows=sample_rows)
@@ -28,12 +43,15 @@ def suggest_metadata(file_path: str, sample_rows: int = 5) -> List[Dict[str, Any
             else:
                 datatype = 'nominal'
 
+            is_bids = col in KNOWN_BIDS_FIELDS
+
             # Build a suggestion object
             suggestion = {
                 "original_variable_name": col,
-                "generalized_variable_name": col.lower().replace(" ", "_").replace("-", "_"), # Placeholder for LLM refinement
+                "bids_standard_name": col if is_bids else col.lower().replace(" ", "_").replace("-", "_"),
                 "datatype": datatype,
                 "levels": json.dumps([str(v) for v in sample_vals[:10]]) if datatype in ['nominal', 'ordinal'] else "[]",
+                "is_bids": is_bids,
                 "sample_values": str(sample_vals[:3])
             }
             suggestions.append(suggestion)
@@ -41,4 +59,3 @@ def suggest_metadata(file_path: str, sample_rows: int = 5) -> List[Dict[str, Any
         return suggestions
     except Exception as e:
         return [{"error": str(e)}]
-

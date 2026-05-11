@@ -6,6 +6,10 @@ class MultiOmicsHarmonizer(BaseHarmonizer):
     """
     Standard Plugin for Multi-Omics datasets (Genomics, Proteomics, Metabolomics).
     Handles tabular data ingestion (VCF-parsed CSV or Mass-Spec reports).
+    
+    Non-BIDS modality: field names are mapped to BIDS-compatible names
+    where a registry mapping exists. Unmapped fields are preserved with
+    a 'nonstandard_' prefix.
     """
     
     def ingest(self, source_path: Path) -> pd.DataFrame:
@@ -20,19 +24,16 @@ class MultiOmicsHarmonizer(BaseHarmonizer):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         if df.empty:
             return df
-            
-        mapped_vars = self.registry['original_variable_name'].tolist()
-        available_cols = [c for c in df.columns if c in mapped_vars]
         
-        # Filtering for mapped variables (Zero-Trust)
-        result = df[available_cols].copy()
-        
-        # Logic to infer omics sub-modality
+        # Logic to infer omics sub-modality (before harmonization so the column exists)
         if 'rsid' in df.columns:
-            result['modality_category'] = 'genomics'
+            df['modality_category'] = 'genomics'
         elif 'protein_id' in df.columns:
-            result['modality_category'] = 'proteomics'
+            df['modality_category'] = 'proteomics'
         elif 'metabolite_name' in df.columns:
-            result['modality_category'] = 'metabolomics'
+            df['modality_category'] = 'metabolomics'
+        
+        # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
+        result = self.harmonize_columns(df)
             
         return result

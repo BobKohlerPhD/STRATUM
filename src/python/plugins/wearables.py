@@ -8,6 +8,10 @@ class WearableHarmonizer(BaseHarmonizer):
     Standard Plugin for Digital Biomarkers and Wearables.
     Pre-processes high-frequency time-series data (e.g., continuous HR)
     and aggregates it into clinically meaningful scalars for the Gold Tier.
+    
+    Non-BIDS modality: field names are mapped to BIDS-compatible names
+    where a registry mapping exists. Unmapped fields are preserved with
+    a 'nonstandard_' prefix.
     """
     
     def ingest(self, source_path: Path) -> pd.DataFrame:
@@ -38,15 +42,12 @@ class WearableHarmonizer(BaseHarmonizer):
             if isinstance(stages, list) and len(stages) > 0:
                 deep = stages.count('deep')
                 rem = stages.count('rem')
-                light = stages.count('light')
                 total = len(stages)
                 df['sleep_efficiency'] = ((deep + rem) / total) * 100 if total > 0 else 0
 
-        # Schema Enforcement
-        mapped_vars = self.registry['original_variable_name'].tolist()
-        available_cols = [c for c in df.columns if c in mapped_vars]
+        df['modality_category'] = 'digital_biomarker_wearable'
         
-        result = df[available_cols].copy()
-        result['modality_category'] = 'digital_biomarker_wearable'
+        # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
+        result = self.harmonize_columns(df)
              
         return result

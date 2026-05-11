@@ -6,7 +6,10 @@ class ClinicalAssessmentHarmonizer(BaseHarmonizer):
     """
     Standard Plugin for Clinical Assessment and Survey Data.
     Handles data from external survey tools like REDCap, Qualtrics, or native CRFs.
-    Ensures survey scoring logic maps strictly to the Master Registry.
+    
+    Non-BIDS modality: field names are mapped to BIDS-compatible names
+    where a registry mapping exists. Unmapped fields are preserved with
+    a 'nonstandard_' prefix.
     """
     
     def ingest(self, source_path: Path) -> pd.DataFrame:
@@ -19,17 +22,14 @@ class ClinicalAssessmentHarmonizer(BaseHarmonizer):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         if df.empty:
             return df
-            
-        mapped_vars = self.registry['original_variable_name'].tolist()
-        available_cols = [c for c in df.columns if c in mapped_vars]
-        
-        # Zero-Trust Filter: Keeps only documented psychometric/survey scores
-        result = df[available_cols].copy()
         
         # Standardize Modality Tagging
         if 'phq9_total' in df.columns or 'gad7_total' in df.columns:
-             result['modality_category'] = 'clinical_survey_psychometrics'
+             df['modality_category'] = 'clinical_survey_psychometrics'
         else:
-             result['modality_category'] = 'clinical_survey_general'
+             df['modality_category'] = 'clinical_survey_general'
+        
+        # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
+        result = self.harmonize_columns(df)
              
         return result

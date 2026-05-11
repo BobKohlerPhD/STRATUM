@@ -1,14 +1,15 @@
 import pandas as pd
 from typing import Tuple
 
-# Simplified integrity check for public framework
-# This ensures required columns are present in the master registry
+# Registry integrity check aligned with the BIDS-first schema.
+# Verifies the required columns are present in the master registry.
 
 required_columns = [
     'original_variable_name',
-    'generalized_variable_name',
+    'bids_standard_name',
     'datatype',
-    'levels'
+    'levels',
+    'is_bids'
 ]
 
 def check_integrity(file_path: str = 'clinical_registry_master.csv') -> Tuple[bool, str]:
@@ -33,4 +34,3 @@ def check_integrity(file_path: str = 'clinical_registry_master.csv') -> Tuple[bo
         return False, f"ERROR: {file_path} not found."
     except Exception as e:
         return False, f"ERROR: {str(e)}"
-

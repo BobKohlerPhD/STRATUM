@@ -1,2 +1,0 @@
-MagneticFieldStrength,Manufacturer,MRAcquisitionType,ScanningSequence,AcquisitionTime,SliceThickness,EchoTime,RepetitionTime,FlipAngle,EffectiveEchoSpacing,TotalReadoutTime,PhaseEncodingDirection,modality_category
-3,Siemens,2D,EP,14:20:30.000000,3,0.03,2.0,90,0.00024,0.015,j-,functional_mri

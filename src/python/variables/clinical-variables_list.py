@@ -5,7 +5,7 @@ from typing import List, Optional
 
 def get_filtered_variable_names(
     search_keyword: Optional[str] = None, 
-    search_column: str = 'generalized_variable_name', 
+    search_column: str = 'bids_standard_name', 
     output_column: str = 'original_variable_name', 
     fuzzy: bool = True
 ) -> List[str]:

@@ -40,7 +40,7 @@ Agents MUST employ a `<thinking>` block for all data transformations to map symb
 The following operations are exposed as native tools for the agent:
 *   **check_registry_integrity**: Automated verification of the Master Clinical Registry.
 *   **generate_synthetic_cohort**: High-fidelity orchestration of synthetic digital twins.
-*   **gather_variables**: Native R-language statistical aggregation and harmonization.
+*   **gather_variables**: Native Python-based statistical aggregation and harmonization.
 *   **suggest_metadata_from_raw**: AI-assisted inference of metadata from cryptic raw headers.
 *   **list_registry_variables**: Resilient discovery of clinical variables with fuzzy matching.
 

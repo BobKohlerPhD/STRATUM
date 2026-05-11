@@ -1,2 +1,0 @@
-MagneticFieldStrength,Manufacturer,MRAcquisitionType,ScanningSequence,EchoTime,RepetitionTime,FlipAngle,SliceThickness,PhaseEncodingDirection,modality_category
-3,Siemens,3D,GR_IR,0.00298,2.3,9,1.0,i,structural_mri

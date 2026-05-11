@@ -6,9 +6,12 @@ from src.python.core.harmonizer import BaseHarmonizer
 
 class fMRINilearnHarmonizer(BaseHarmonizer):
     """
-    Computational plug-in for fMRI.
-    Instead of just parsing metadata, it ingests a 4D fMRI NIfTI,
-    processes the BOLD signals across time, and extracts the global amplitude.
+    Computational plug-in for fMRI BOLD signal processing.
+    Ingests a 4D fMRI NIfTI, processes the BOLD signals across time,
+    and extracts the global amplitude as a derived feature.
+    
+    BIDS-First: Output features are preserved alongside any BIDS metadata.
+    Computed fields use BIDS-compatible naming where applicable.
     """
     
     def ingest(self, source_path: Path) -> pd.DataFrame:
@@ -31,11 +34,15 @@ class fMRINilearnHarmonizer(BaseHarmonizer):
                 # We calculate the amplitude (Standard Deviation of the BOLD signal)
                 fmri_amplitude = np.std(global_timeseries)
                 
-                # Output as a single computational feature
-                return pd.DataFrame([{
+                row = {
                     "fmri_amplitude": fmri_amplitude,
                     "modality_category": "functional_mri_bold_signal"
-                }])
+                }
+                
+                # Extract BIDS entities (participant_id, session) from path
+                row.update(self.extract_bids_entities(source_path))
+                
+                return pd.DataFrame([row])
             else:
                 self.logger.error("fMRI requires 4-Dimensional NIfTI data.")
                 return pd.DataFrame()
@@ -47,13 +54,8 @@ class fMRINilearnHarmonizer(BaseHarmonizer):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         if df.empty:
             return df
-            
-        mapped_vars = self.registry['original_variable_name'].tolist()
-        available_cols = [c for c in df.columns if c in mapped_vars]
         
-        result = df[available_cols].copy()
-        # Keep the modality category injected during ingest
-        if 'modality_category' in df.columns:
-             result['modality_category'] = df['modality_category'].iloc[0]
-             
+        # Apply BIDS-first harmonization (preserve everything)
+        result = self.harmonize_columns(df)
+        
         return result

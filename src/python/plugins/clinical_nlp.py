@@ -6,6 +6,10 @@ class ClinicalNLPHarmonizer(BaseHarmonizer):
     """
     Standard Plugin for Unstructured Clinical Notes.
     Simulates NLP extraction of phenotypes (e.g., SNOMED-CT) from raw text.
+    
+    Non-BIDS modality: field names are mapped to BIDS-compatible names
+    where a registry mapping exists. Unmapped fields are preserved with
+    a 'nonstandard_' prefix.
     """
     
     def ingest(self, source_path: Path) -> pd.DataFrame:
@@ -36,11 +40,9 @@ class ClinicalNLPHarmonizer(BaseHarmonizer):
              # The raw note is PII, it will be kept here initially but must be redacted
              # prior to Gold Tier insertion based on registry policies.
 
-        # Schema Enforcement
-        mapped_vars = self.registry['original_variable_name'].tolist()
-        available_cols = [c for c in df.columns if c in mapped_vars]
+        df['modality_category'] = 'unstructured_clinical_nlp'
         
-        result = df[available_cols].copy()
-        result['modality_category'] = 'unstructured_clinical_nlp'
+        # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
+        result = self.harmonize_columns(df)
              
         return result
