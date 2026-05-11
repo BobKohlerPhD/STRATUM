@@ -13,9 +13,12 @@ env.bak/
 venv.bak/
 
 # STRATUM Data Tiers (Sensitive patient or test data)
-data/bronze/
-data/silver/
-data/gold/
+data/bronze/*
+!data/bronze/.gitkeep
+data/silver/*
+!data/silver/.gitkeep
+data/gold/*
+!data/gold/.gitkeep
 clinical_registry_master.csv
 
 # Ignore specific modality data directories
@@ -29,7 +32,8 @@ data/**/*.csv
 data/**/*.tsv
 
 # Logs
-logs/
+logs/*
+!logs/.gitkeep
 *.log
 
 # OS generated files
@@ -46,8 +50,6 @@ Thumbs.db
 .claude*
 .gemini/
 .gemini*
-GEMINI.MD
-gemini.md
 NEXT_STEPS.md
 
 # Visualization, Schematics & Scripts
