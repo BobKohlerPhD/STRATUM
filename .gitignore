@@ -41,12 +41,14 @@ ehthumbs.db
 Thumbs.db
 
 # AI & Agent Artifacts
-*claude*
-*gemini*
+.claude*
+.gemini*
 .gemini/
 GEMINI.MD
 gemini.md
 NEXT_STEPS.md
+
+
 
 # Visualization, Schematics & Scripts
 *.svg
@@ -58,3 +60,4 @@ NEXT_STEPS.md
 *visualization*
 generate_diagrams.py
 charts/
+legacy/
