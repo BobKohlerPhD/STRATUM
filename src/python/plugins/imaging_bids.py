@@ -37,18 +37,30 @@ class BIDSHarmonizer(BaseHarmonizer):
         # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
         result = self.harmonize_columns(df)
         
-        # Infer MRI sub-modality from BIDS fields
-        modality = 'mri'
+        # Infer sub-modality from BIDS fields and filename
+        modality = 'imaging_mri' # Default base
+        
+        # Check filename first for strong BIDS indicators
+        source_name = str(self.logger.name).lower() # Class logger might have info, but better check source path
+        
+        # Use filename logic if possible
+        desc = ""
         if 'SeriesDescription' in result.columns:
             desc = str(result['SeriesDescription'].iloc[0]).lower()
-            if 't1' in desc:
-                modality = 'structural_mri'
-            elif 'bold' in desc or 'fmri' in desc:
-                modality = 'functional_mri'
-            elif 'dwi' in desc or 'diff' in desc or 'dti' in desc:
-                modality = 'diffusion_mri'
-            elif 'mrs' in desc or 'spec' in desc:
-                modality = 'magnetic_resonance_spectroscopy'
+            
+        # Refined Modality Inference
+        if 'TracerName' in result.columns or '_pet' in desc:
+            modality = 'imaging_pet'
+        elif 'PostLabelingDelay' in result.columns or 'asl' in desc:
+            modality = 'imaging_asl'
+        elif 't1' in desc or 't2' in desc or 'anat' in desc:
+            modality = 'structural_mri'
+        elif 'bold' in desc or 'fmri' in desc:
+            modality = 'functional_mri'
+        elif 'dwi' in desc or 'diff' in desc or 'dti' in desc:
+            modality = 'diffusion_mri'
+        elif 'mrs' in desc or 'spec' in desc:
+            modality = 'magnetic_resonance_spectroscopy'
         
         result['modality_category'] = modality
         return result

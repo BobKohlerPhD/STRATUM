@@ -4,37 +4,55 @@ import re
 import logging
 from pathlib import Path
 
+import sqlite3
+
 class BaseHarmonizer(ABC):
     """
     Abstract Base Class for all modality-specific harmonizers.
     Part of the STRATUM skeletal architecture.
-    
-    BIDS-First Philosophy:
-    - BIDS variable names are the canonical standard.
-    - Data arriving in BIDS format keeps its original field names.
-    - Non-BIDS data gets renamed to BIDS names where a mapping exists.
-    - Fields with no registry mapping are NEVER dropped; they are
-      preserved with a 'nonstandard_' prefix to flag them as non-BIDS.
     """
-    def __init__(self, registry_path: Path):
-        self.registry_path = registry_path
+    def __init__(self, registry_db_path: Path):
+        self.db_path = registry_db_path
         self.logger = logging.getLogger(f"STRATUM-{self.__class__.__name__}")
-        self.registry = self._load_registry()
+        self._conn = None
 
-    def _load_registry(self):
+    @property
+    def conn(self):
+        if self._conn is None:
+            self._conn = sqlite3.connect(self.db_path)
+            self._conn.row_factory = sqlite3.Row
+        return self._conn
+
+    def _get_standard_name_by_code(self, code: str, code_column: str = 'loinc_code') -> str:
+        """Lookup a standard_name by a code (e.g., LOINC) using indexed SQLite."""
         try:
-            return pd.read_csv(self.registry_path)
+            cursor = self.conn.cursor()
+            query = f"SELECT standard_name FROM variables WHERE {code_column} = ?"
+            cursor.execute(query, (str(code),))
+            result = cursor.fetchone()
+            return result['standard_name'] if result else None
         except Exception as e:
-            self.logger.error(f"Failed to load registry: {e}")
-            return pd.DataFrame()
+            self.logger.error(f"Registry lookup failed: {e}")
+            return None
+
+    def get_categorical_label(self, standard_name: str, code: str) -> str:
+        """Get the human-readable label for a categorical code."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(
+                "SELECT label FROM categorical_lookups WHERE standard_name = ? AND code = ?",
+                (standard_name, str(code))
+            )
+            result = cursor.fetchone()
+            return result['label'] if result else None
+        except Exception as e:
+            self.logger.error(f"Categorical lookup failed: {e}")
+            return None
 
     @staticmethod
     def extract_bids_entities(source_path: Path) -> dict:
         """
         Extract BIDS entities (participant_id, visit_session) from a file path.
-        Works with both BIDS directory structures and BIDS filenames:
-          - Directory: .../sub-001/ses-01/anat/sub-001_T1w.json
-          - Flat file: .../sub-001_ses-01_task-rest_bold.json
         """
         full_path = str(source_path)
         entities = {}
@@ -53,27 +71,35 @@ class BaseHarmonizer(ABC):
 
     def _build_rename_map(self) -> dict:
         """
-        Build a mapping from original_variable_name -> bids_standard_name.
-        Only includes entries where the two differ (i.e., non-BIDS fields
-        that need renaming to their BIDS-compatible canonical name).
+        Build a mapping from original_variable_name -> standard_name using SQLite.
         """
-        if self.registry.empty:
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT original_variable_name, standard_name FROM variables")
+            rename_map = {}
+            for row in cursor.fetchall():
+                orig = row['original_variable_name']
+                std = row['standard_name']
+                if orig and std and orig != std:
+                    rename_map[orig] = std
+            return rename_map
+        except Exception as e:
+            self.logger.error(f"Failed to build rename map: {e}")
             return {}
-        rename_map = {}
-        for _, row in self.registry.iterrows():
-            orig = row.get('original_variable_name', '')
-            bids = row.get('bids_standard_name', '')
-            if orig and bids and orig != bids:
-                rename_map[orig] = bids
-        return rename_map
 
     def _get_known_fields(self) -> set:
-        """Return all field names the registry knows about (both original and BIDS)."""
-        if self.registry.empty:
+        """Return all field names the registry knows about from SQLite."""
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT original_variable_name, standard_name FROM variables")
+            known = set()
+            for row in cursor.fetchall():
+                if row['original_variable_name']: known.add(row['original_variable_name'])
+                if row['standard_name']: known.add(row['standard_name'])
+            return known
+        except Exception as e:
+            self.logger.error(f"Failed to get known fields: {e}")
             return set()
-        originals = set(self.registry['original_variable_name'].dropna().tolist())
-        bids_names = set(self.registry['bids_standard_name'].dropna().tolist())
-        return originals | bids_names
 
     def harmonize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """

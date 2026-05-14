@@ -17,42 +17,6 @@ from pathlib import Path
 from datetime import datetime
 from src.python.core.harmonizer import BaseHarmonizer
 
-# Common LOINC code → human-readable name map
-LOINC_MAP = {
-    "8867-4":  "heart_rate",
-    "8480-6":  "systolic_bp",
-    "8462-4":  "diastolic_bp",
-    "8310-5":  "body_temperature",
-    "9279-1":  "respiratory_rate",
-    "2708-6":  "spo2",
-    "29463-7": "body_weight",
-    "8302-2":  "body_height",
-    "39156-5": "bmi",
-    "2345-7":  "glucose",
-    "2160-0":  "creatinine",
-    "2093-3":  "total_cholesterol",
-    "2571-8":  "triglycerides",
-    "2085-9":  "hdl_cholesterol",
-    "13457-7": "ldl_cholesterol",
-    "718-7":   "hemoglobin",
-    "4544-3":  "hematocrit",
-    "6690-2":  "wbc_count",
-    "26515-7": "platelet_count",
-    "1742-6":  "alt",
-    "1920-8":  "ast",
-    "1975-2":  "bilirubin_total",
-    "2951-2":  "sodium",
-    "2823-3":  "potassium",
-    "17861-6": "calcium",
-    "2339-0":  "glucose_fasting",
-    "4548-4":  "hba1c",
-    "33914-3": "egfr",
-    "14749-6": "glucose_urine",
-    "5803-2":  "ph_urine",
-    "2947-0":  "bun",
-}
-
-
 class FHIRHarmonizer(BaseHarmonizer):
     """
     Plugin for HL7 FHIR R4 Bundle harmonization.
@@ -161,8 +125,16 @@ class FHIRHarmonizer(BaseHarmonizer):
                 loinc_code = coding.get('code', '')
                 display = coding.get('display', display)
         
-        # Map LOINC code to canonical name
-        canonical_name = LOINC_MAP.get(loinc_code, display.lower().replace(' ', '_') if display else f"obs_{loinc_code}")
+        # Map LOINC code to canonical name using the central registry
+        std_name = self._get_standard_name_by_code(loinc_code)
+        
+        if std_name:
+            canonical_name = std_name
+        elif display:
+            canonical_name = display.lower().replace(' ', '_')
+        else:
+            canonical_name = f"obs_{loinc_code}"
+            
         row['observation_name'] = canonical_name
         row['loinc_code'] = loinc_code
         
@@ -184,10 +156,10 @@ class FHIRHarmonizer(BaseHarmonizer):
         row['observation_datetime'] = resource.get('effectiveDateTime', '')
         
         # Determine modality_category based on content
-        vital_signs = {'heart_rate', 'systolic_bp', 'diastolic_bp', 'body_temperature',
-                       'respiratory_rate', 'spo2', 'body_weight', 'body_height', 'bmi'}
+        vital_signs_keywords = {'heart_rate', 'blood_pressure', 'temperature', 'respiratory', 'spo2', 'weight', 'height', 'bmi'}
+        is_vital = any(kw in canonical_name.lower() for kw in vital_signs_keywords)
         
-        if canonical_name in vital_signs:
+        if is_vital:
             row['modality_category'] = 'vital_signs'
         else:
             row['modality_category'] = 'lab_results'

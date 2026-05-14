@@ -48,10 +48,21 @@ def suggest_metadata(file_path: str, sample_rows: int = 5) -> List[Dict[str, Any
             # Build a suggestion object
             suggestion = {
                 "original_variable_name": col,
-                "bids_standard_name": col if is_bids else col.lower().replace(" ", "_").replace("-", "_"),
+                "standard_name": col if is_bids else col.lower().replace(" ", "_").replace("-", "_"),
+                "loinc_code": "",
+                "sdtm_variable": "",
+                "accession_id": "",
+                "hed_tags": "",
+                "omop_concept_id": "0",
+                "cde_id": "",
+                "phenx_id": "",
+                "umls_cui": "",
                 "datatype": datatype,
                 "levels": json.dumps([str(v) for v in sample_vals[:10]]) if datatype in ['nominal', 'ordinal'] else "[]",
-                "is_bids": is_bids,
+                "units": "",
+                "description": f"Auto-generated suggestion for {col}",
+                "modality": "unknown",
+                "vocabulary": "BIDS" if is_bids else "STRATUM",
                 "sample_values": str(sample_vals[:3])
             }
             suggestions.append(suggestion)

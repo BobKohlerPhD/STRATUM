@@ -206,8 +206,8 @@ async def check_registry_integrity() -> str:
     """Automated verification of the Master Clinical Registry."""
     try:
         registry_path = PROJECT_ROOT / "clinical_registry_master.csv"
-        is_valid, message = await asyncio.to_thread(check_integrity, str(registry_path))
-        return message
+        is_valid, messages = await asyncio.to_thread(check_integrity, str(registry_path))
+        return "\n".join(messages)
     except Exception as e:
         logger.exception(f"Error checking registry integrity: {e}")
         return f"Error: {str(e)}"
@@ -395,7 +395,16 @@ async def export_modality_report(params: ModalityReportInput) -> str:
 @mcp.resource("clinical-registry://master")
 def get_registry_master() -> str:
     """Returns the contents of the master clinical registry CSV."""
-    return engine.registry_path.read_text()
+    return (PROJECT_ROOT / "clinical_registry_master.csv").read_text()
+
+@mcp.resource("clinical-registry://db")
+def get_registry_db_info() -> str:
+    """Returns information about the compiled registry database."""
+    db_path = PROJECT_ROOT / "data" / "registry" / "stratum_registry.db"
+    if db_path.exists():
+        size = db_path.stat().st_size
+        return f"SQLite Registry DB: {db_path}\nSize: {size} bytes\nStatus: Compiled and Active"
+    return "SQLite Registry DB: Not found. Run compile_registry.py."
 
 @mcp.resource("data://gold-cohort-summary")
 def get_gold_summary() -> str:

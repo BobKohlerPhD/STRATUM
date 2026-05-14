@@ -25,7 +25,7 @@ class StratumEngine:
         self.bronze_dir = project_root / "data" / "bronze"
         self.silver_dir = project_root / "data" / "silver"
         self.gold_dir = project_root / "data" / "gold"
-        self.registry_path = project_root / "clinical_registry_master.csv"
+        self.registry_db_path = project_root / "data" / "registry" / "stratum_registry.db"
         
         self.logger = logging.getLogger("STRATUM-Engine")
         self._plugins: Dict[str, BaseHarmonizer] = {}
@@ -38,7 +38,7 @@ class StratumEngine:
 
     def register_plugin(self, name: str, plugin_class: Type[BaseHarmonizer]):
         """Register a modality-specific harmonizer."""
-        self._plugins[name] = plugin_class(self.registry_path)
+        self._plugins[name] = plugin_class(self.registry_db_path)
         self.logger.info(f"Registered plugin: {name}")
 
     def process_modality(self, plugin_name: str, source_file: str):

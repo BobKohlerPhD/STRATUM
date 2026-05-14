@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # Virtual Environments
+.env
 .env/
 .venv/
 env/
@@ -12,24 +13,41 @@ ENV/
 env.bak/
 venv.bak/
 
-# STRATUM Data Tiers (Sensitive patient or test data)
-data/bronze/*
-!data/bronze/.gitkeep
-data/silver/*
-!data/silver/.gitkeep
-data/gold/*
-!data/gold/.gitkeep
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python distribution / build
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.tox/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# STRATUM Data (Sensitive patient or test data)
+data/**
+!data/**/
+!data/**/.gitkeep
 clinical_registry_master.csv
 
-# Ignore specific modality data directories
-data/**/*.nii
-data/**/*.nii.gz
-data/**/*.edf
-data/**/*.bdf
-data/**/*.dcm
-data/**/*.json
-data/**/*.csv
-data/**/*.tsv
+# Ignore common data file types globally
+*.db
+*.sqlite
+*.sqlite3
+*.csv
+*.tsv
+*.nii
+*.nii.gz
+*.edf
+*.bdf
+*.dcm
+*.json
 
 # Logs
 logs/*
