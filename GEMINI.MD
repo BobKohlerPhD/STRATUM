@@ -60,5 +60,4 @@ The following operations are exposed as native tools for the agent:
 5. **LOG**: Automatically record every action in the `stratum_audit.log` for clinical traceability.
 
 ---
-**Repository**: [Link Restricted]
 **Methodology**: Autonomously Engineered via Gemini-CLI + Gemini 3
