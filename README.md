@@ -2,7 +2,7 @@
 ## Agent-Driven Orchestration of Multimodal Clinical Data
 
 
-**WIP, currently using this architecture to eventually merge with a tool for MRI and EEG
+**WIP, currently using this architecture to eventually merge with a tool for MRI and EEG**
 
 
 STRATUM is designed to harmonize high-dimensional, heterogeneous clinical datasets into longitudinal cohorts. It utilizes a tiered skeletal architecture—aligned with the Medallion Data Pattern—to automate the processing of Multi-Omics, EHR (FHIR), and high-frequency digital biomarkers.
