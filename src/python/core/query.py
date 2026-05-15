@@ -37,9 +37,9 @@ def query_gold_tier(
     if not gold_path.exists():
         return {"error": "Gold tier not yet generated. Run generate_gold_tier first.", "data": []}
     
-    # Standard pandas NAs minus 'n/a'
-    bids_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
-    df = pd.read_csv(gold_path, keep_default_na=False, na_values=bids_na_values)
+    # Standard clinical NAs
+    stratum_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
+    df = pd.read_csv(gold_path, keep_default_na=False, na_values=stratum_na_values)
     original_shape = df.shape
     
     # Filter participants
@@ -96,9 +96,9 @@ def get_available_modalities(gold_path: Path) -> Dict[str, List[str]]:
     if not gold_path.exists():
         return {"error": "Gold tier not yet generated."}
     
-    # Standard pandas NAs minus 'n/a'
-    bids_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
-    df = pd.read_csv(gold_path, nrows=0, keep_default_na=False, na_values=bids_na_values)
+    # Standard clinical NAs
+    stratum_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
+    df = pd.read_csv(gold_path, nrows=0, keep_default_na=False, na_values=stratum_na_values)
     modalities: Dict[str, List[str]] = {}
     
     for col in df.columns:

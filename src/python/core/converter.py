@@ -4,8 +4,8 @@ import logging
 
 class BaseConverter(ABC):
     """
-    Base class for MRI format converters.
-    Transitions data from raw (e.g. DICOM, NIfTI) to STRATUM-compatible JSON sidecars.
+    Base class for clinical data format converters.
+    Transitions data from raw source formats to STRATUM-compatible JSON sidecars.
     """
     def __init__(self):
         self.logger = logging.getLogger(f"STRATUM-Converter-{self.__class__.__name__}")
@@ -13,7 +13,7 @@ class BaseConverter(ABC):
     @abstractmethod
     def convert(self, source_path: Path, output_dir: Path) -> Path:
         """
-        Converts a raw format to a standard BIDS-like JSON sidecar.
+        Converts a raw format to a standard JSON sidecar.
         Returns the path to the generated JSON.
         """
         pass

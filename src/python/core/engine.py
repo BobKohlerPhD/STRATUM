@@ -16,8 +16,7 @@ class StratumEngine:
     - Each silver file becomes one row per participant+session+modality.
     - Multi-row modalities (e.g., multiple genotype variants) are pivoted
       into a single row with indexed columns before merging.
-    - Columns are prefixed with the modality_category to prevent collisions
-      (e.g., eeg.SamplingFrequency, structural_mri.MagneticFieldStrength).
+    - Columns are prefixed with the modality_category to prevent collisions.
     - No Cartesian products — one row per participant per session.
     """
     def __init__(self, project_root: Path):
@@ -43,21 +42,14 @@ class StratumEngine:
 
     def process_modality(self, plugin_name: str, source_file: str):
         """Processes a single file using a registered plugin."""
+        source_path = self.bronze_dir / source_file
+        output_path = self.silver_dir / f"harmonized_{plugin_name}_{Path(source_file).stem}.csv"
+
         if plugin_name not in self._plugins:
             self.logger.error(f"Plugin {plugin_name} not found.")
             return
             
         plugin = self._plugins[plugin_name]
-        source_path = self.bronze_dir / source_file
-        
-        # Check if we need to convert the file first
-        if source_path.suffix in self._converters:
-            converter = self._converters[source_path.suffix]
-            # Convert to a temporary JSON sidecar in the silver directory for harmonization
-            source_path = converter.convert(source_path, self.silver_dir)
-            
-        output_path = self.silver_dir / f"harmonized_{plugin_name}_{Path(source_file).stem}.csv"
-        return plugin.run(source_path, output_path)
 
     def batch_process(self, tasks: List[tuple]):
         """Asynchronous multi-modal batch ingestion using thread pooling."""
@@ -170,13 +162,13 @@ class StratumEngine:
             self.logger.warning("No silver tier data found.")
             return
         
-        # Standard pandas NAs minus 'n/a' to preserve BIDS compliance
-        bids_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
+        # Standard clinical NAs to preserve data integrity
+        stratum_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
         
         flat_dfs = []
         for f in silver_files:
             try:
-                df = pd.read_csv(f, keep_default_na=False, na_values=bids_na_values)
+                df = pd.read_csv(f, keep_default_na=False, na_values=stratum_na_values)
                 
                 # Ensure visit_session exists
                 if 'visit_session' not in df.columns:
@@ -232,4 +224,6 @@ class StratumEngine:
         output_path = self.gold_dir / "gold_multimodal_cohort.csv"
         gold_df.to_csv(output_path, index=False)
         self.logger.info(f"SUCCESS: Generated Gold Tier matrix with shape {gold_df.shape} at {output_path}")
+        return gold_df
+with shape {gold_df.shape} at {output_path}")
         return gold_df

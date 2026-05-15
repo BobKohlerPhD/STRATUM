@@ -34,12 +34,12 @@ def generate_modality_report(
     
     reports: Dict[str, Any] = {}
     
-    # Standard pandas NAs minus 'n/a' to preserve BIDS compliance
-    bids_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
+    # Standard clinical NAs
+    stratum_na_values = ['', '#N/A', '#N/A N/A', '#NA', '-1.#IND', '-1.#QNAN', '-NaN', '-nan', '1.#IND', '1.#QNAN', '<NA>', 'N/A', 'NA', 'NULL', 'NaN', 'None', 'nan', 'null']
 
     for f in silver_files:
         try:
-            df = pd.read_csv(f, keep_default_na=False, na_values=bids_na_values)
+            df = pd.read_csv(f, keep_default_na=False, na_values=stratum_na_values)
             if df.empty:
                 continue
             
@@ -107,7 +107,7 @@ def _analyze_dataframe(df: pd.DataFrame, filename: str, modality: str) -> Dict[s
             "non_null_count": int(df[col].notna().sum()),
             "null_count": int(df[col].isna().sum()),
             "completeness": round(df[col].notna().mean(), 3),
-            "is_bids_field": not col.startswith('nonstandard_'),
+            "is_standard_field": not col.startswith('nonstandard_'),
         }
         
         # Numeric stats

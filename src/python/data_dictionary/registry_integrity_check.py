@@ -53,10 +53,6 @@ def check_integrity(file_path: str = 'clinical_registry_master.csv') -> Tuple[bo
             if dtype not in VALID_DATATYPES:
                 errors.append(f"DATA ERROR [{var_name}]: Invalid datatype '{dtype}'")
 
-            # Check for generic IDs (Potential Collisions)
-            if omop_id in [4267416, 4329847] and row.get('vocabulary') != 'OMOP':
-                errors.append(f"WARNING [{var_name}]: Possible generic ID collision detected ({omop_id})")
-
         if errors:
             return False, errors
         

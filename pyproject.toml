@@ -8,9 +8,7 @@ authors = [
 dependencies = [
     "mcp>=1.2.0",
     "fastmcp>=0.4.1",
-    "pandas>=2.0.0",
-    "nibabel>=5.0.0",
-    "nilearn>=0.10.0"
+    "pandas>=2.0.0"
 ]
 requires-python = ">=3.11"
 

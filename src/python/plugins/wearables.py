@@ -9,7 +9,7 @@ class WearableHarmonizer(BaseHarmonizer):
     Pre-processes high-frequency time-series data (e.g., continuous HR)
     and aggregates it into clinically meaningful scalars for the Gold Tier.
     
-    Non-BIDS modality: field names are mapped to BIDS-compatible names
+    Standard modality: field names are mapped to registry-standard names
     where a registry mapping exists. Unmapped fields are preserved with
     a 'nonstandard_' prefix.
     """
@@ -47,7 +47,7 @@ class WearableHarmonizer(BaseHarmonizer):
 
         df['modality_category'] = 'digital_biomarker_wearable'
         
-        # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
+        # Apply registry-standard harmonization (preserve everything, rename mapped fields)
         result = self.harmonize_columns(df)
              
         return result

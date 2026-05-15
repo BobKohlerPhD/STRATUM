@@ -58,7 +58,7 @@ class FHIRHarmonizer(BaseHarmonizer):
         df = pd.DataFrame(rows)
         
         # Extract participant_id
-        entities = self.extract_bids_entities(source_path)
+        entities = self.extract_path_entities(source_path)
         for key, val in entities.items():
             df[key] = val
         

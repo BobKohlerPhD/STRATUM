@@ -50,9 +50,9 @@ class BaseHarmonizer(ABC):
             return None
 
     @staticmethod
-    def extract_bids_entities(source_path: Path) -> dict:
+    def extract_path_entities(source_path: Path) -> dict:
         """
-        Extract BIDS entities (participant_id, visit_session) from a file path.
+        Extract core entities (participant_id, visit_session) from a file path.
         """
         full_path = str(source_path)
         entities = {}
@@ -103,8 +103,8 @@ class BaseHarmonizer(ABC):
 
     def harmonize_columns(self, df: pd.DataFrame) -> pd.DataFrame:
         """
-        Apply BIDS-first harmonization to a DataFrame:
-        1. Rename non-BIDS field names to their BIDS equivalents (where mapped).
+        Apply registry-based harmonization to a DataFrame:
+        1. Rename original field names to their standard equivalents (where mapped).
         2. Preserve ALL fields — unmapped fields get a 'nonstandard_' prefix.
         """
         if df.empty:
@@ -112,11 +112,11 @@ class BaseHarmonizer(ABC):
 
         result = df.copy()
 
-        # Step 1: Rename non-BIDS fields to BIDS names where mapping exists
+        # Step 1: Rename fields to standard names where mapping exists
         rename_map = self._build_rename_map()
         cols_to_rename = {c: rename_map[c] for c in result.columns if c in rename_map}
         if cols_to_rename:
-            self.logger.info(f"Renaming non-BIDS fields to BIDS standard: {cols_to_rename}")
+            self.logger.info(f"Renaming fields to registry standard: {cols_to_rename}")
             result = result.rename(columns=cols_to_rename)
 
         # Step 2: Flag unmapped fields with nonstandard_ prefix

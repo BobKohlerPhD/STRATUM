@@ -17,24 +17,9 @@ logger = logging.getLogger("STRATUM-Discovery")
 # File extension → plugin name mapping
 # The engine uses this to automatically route files to the correct harmonizer
 EXTENSION_PLUGIN_MAP: Dict[str, str] = {
-    # BIDS neuroimaging sidecars (JSON)
-    # Routing for JSON requires content inspection — handled in _classify_json()
-    
     # Tabular formats
     ".csv":     None,  # Requires content inspection
-    ".tsv":     None,  # BIDS tabular data
     ".parquet": "omics",
-    
-    # Neuroimaging raw data
-    ".nii":     "fmri_signal",
-    ".nii.gz":  "fmri_signal",
-    
-    # Electrophysiology
-    ".edf":     "eeg_signal",
-    ".bdf":     "eeg_signal",
-    ".set":     "eeg_signal",      # EEGLAB format
-    ".fif":     "eeg_signal",      # MNE-Python format
-    ".vhdr":    "eeg_signal",      # BrainVision
     
     # Other
     ".json":    None,  # Requires content inspection
@@ -49,8 +34,6 @@ DIRECTORY_MODALITY_MAP: Dict[str, str] = {
     "biospecimens":  "biospecimens",
     "ehr_notes":    "nlp",
     "wearables":    "wearables",
-    "imaging":      "bids",
-    "eeg":          "eeg",
     "ehr":          None,   # FHIR — needs dedicated handler
     "pharmacy":     None,   # Future
     "demographics": None,   # Future
@@ -101,39 +84,27 @@ class SubjectManifest:
 
 
 def _extract_subject_id(path: Path) -> str:
-    """Extract subject ID from BIDS-style path or filename."""
+    """Extract subject ID from path or filename."""
     full = str(path)
     match = re.search(r'(sub-[a-zA-Z0-9]+)', full)
     return match.group(1) if match else "sub-unknown"
 
 
 def _extract_session_id(path: Path) -> Optional[str]:
-    """Extract session ID from BIDS-style path or filename."""
+    """Extract session ID from path or filename."""
     full = str(path)
     match = re.search(r'(ses-[a-zA-Z0-9]+)', full)
     return match.group(1) if match else None
 
-
 def _classify_json(filepath: Path, modality_dir: str) -> Optional[str]:
     """
     Inspect a JSON file's contents to determine which plugin should handle it.
-    BIDS sidecars are classified by their field signatures.
     """
     try:
         with open(filepath, 'r') as f:
             data = json.load(f)
         keys = set(data.keys())
-        
-        # EEG BIDS sidecar signature
-        eeg_keys = {'EEGChannelCount', 'SamplingFrequency', 'EEGReference', 'TaskName', 'PowerLineFrequency'}
-        if keys & eeg_keys:
-            return "eeg"
-        
-        # MRI BIDS sidecar signature
-        mri_keys = {'MagneticFieldStrength', 'RepetitionTime', 'EchoTime', 'MRAcquisitionType'}
-        if keys & mri_keys:
-            return "bids"
-        
+
         # FHIR bundle signature
         if 'resourceType' in keys and data.get('resourceType') == 'Bundle':
             return None  # Future: FHIR harmonizer
@@ -141,10 +112,6 @@ def _classify_json(filepath: Path, modality_dir: str) -> Optional[str]:
         # Wearable data signature
         if 'heart_rate_array' in keys or 'sleep_stages_array' in keys or 'device_brand' in keys:
             return "wearables"
-        
-        # Coordinate system / events JSON (BIDS ancillary)
-        if 'EEGCoordinateSystem' in keys or 'IntendedFor' in keys:
-            return None  # Ancillary file, skip
         
         # Fall back to directory hint
         return DIRECTORY_MODALITY_MAP.get(modality_dir)

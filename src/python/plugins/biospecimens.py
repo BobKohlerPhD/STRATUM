@@ -8,7 +8,7 @@ class BiospecimenHarmonizer(BaseHarmonizer):
     Processes Laboratory Information Management System (LIMS) extracts,
     blood panel readouts, and biobank catalog sheets.
     
-    Non-BIDS modality: field names are mapped to BIDS-compatible names
+    Standard modality: field names are mapped to registry-standard names
     where a registry mapping exists. Unmapped fields are preserved with
     a 'nonstandard_' prefix.
     """
@@ -40,7 +40,7 @@ class BiospecimenHarmonizer(BaseHarmonizer):
         else:
             df['modality_category'] = 'biospecimen_unspecified'
         
-        # Apply BIDS-first harmonization (preserve everything, rename non-BIDS)
+        # Apply registry-standard harmonization (preserve everything, rename mapped fields)
         result = self.harmonize_columns(df)
             
         return result

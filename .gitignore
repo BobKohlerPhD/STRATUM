@@ -42,12 +42,11 @@ clinical_registry_master.csv
 *.sqlite3
 *.csv
 *.tsv
-*.nii
-*.nii.gz
-*.edf
-*.bdf
-*.dcm
+*.parquet
 *.json
+*.avro
+*.fhir
+*.hl7
 
 # Logs
 logs/*

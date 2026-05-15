@@ -16,22 +16,16 @@ from pydantic import BaseModel, Field
 # Import the core Engine
 from src.python.core.engine import StratumEngine
 
-# Import Plugins
-from src.python.plugins.imaging_bids import BIDSHarmonizer
+# Import Clinical Plugins
 from src.python.plugins.multi_omics import MultiOmicsHarmonizer
 from src.python.plugins.wearables import WearableHarmonizer
 from src.python.plugins.clinical_nlp import ClinicalNLPHarmonizer
 from src.python.plugins.biospecimens import BiospecimenHarmonizer
 from src.python.plugins.clinical_assessments import ClinicalAssessmentHarmonizer
-from src.python.plugins.fmri_nilearn import fMRINilearnHarmonizer
-from src.python.plugins.eeg_bids import EEGBIDSHarmonizer
-from src.python.plugins.eeg_mne import EEGMNEHarmonizer
 from src.python.plugins.ehr_fhir import FHIRHarmonizer
 
 # Import Converters
 from src.python.plugins.converter_nibabel import NibabelConverter
-from src.python.plugins.converter_edf_to_bids import EDFToBIDSConverter
-from src.python.plugins.converter_dicom_to_bids import DICOMToBIDSConverter
 
 # Import Tool Implementations
 from src.python.data_dictionary.registry_integrity_check import check_integrity
@@ -45,7 +39,6 @@ from src.python.variables.clinical_variables_gather import gather_clinical_varia
 
 # Import New Tool Modules
 from src.python.core.discovery import discover_subjects, build_task_list, get_processing_status as _get_processing_status
-from src.python.core.bids_validator import validate_bids_subject
 from src.python.core.query import query_gold_tier as _query_gold_tier, get_available_modalities
 from src.python.core.quality_report import generate_modality_report as _generate_modality_report
 
@@ -61,30 +54,22 @@ logging.basicConfig(
 logger = logging.getLogger("STRATUM-Orchestrator")
 
 # Initialize the STRATUM MCP Server
-mcp = FastMCP("STRATUM Orchestrator", instructions="STRATUM: Agent-driven orchestration of multimodal clinical data. BIDS-first harmonization across neuroimaging, EEG, omics, wearables, and clinical data.")
+mcp = FastMCP("STRATUM Orchestrator", instructions="STRATUM: Agent-driven orchestration of multimodal clinical data. Specialized in Clinical NLP, EHR/FHIR, Multi-omics, Wearables, and Psychometric data.")
 
 # Initialize the Engine
 PROJECT_ROOT = Path(os.environ.get("STRATUM_PROJECT_ROOT", Path(__file__).parent.resolve()))
 engine = StratumEngine(PROJECT_ROOT)
 
-# Register All Plugins
-engine.register_plugin("bids", BIDSHarmonizer)
+# Register Clinical Plugins
 engine.register_plugin("omics", MultiOmicsHarmonizer)
 engine.register_plugin("wearables", WearableHarmonizer)
 engine.register_plugin("nlp", ClinicalNLPHarmonizer)
 engine.register_plugin("biospecimens", BiospecimenHarmonizer)
 engine.register_plugin("assessments", ClinicalAssessmentHarmonizer)
-engine.register_plugin("fmri_signal", fMRINilearnHarmonizer)
-engine.register_plugin("eeg", EEGBIDSHarmonizer)
-engine.register_plugin("eeg_signal", EEGMNEHarmonizer)
 engine.register_plugin("ehr_fhir", FHIRHarmonizer)
 
 # Register Converters
 engine.register_converter(".nii", NibabelConverter())
-engine.register_converter(".edf", EDFToBIDSConverter())
-engine.register_converter(".bdf", EDFToBIDSConverter())
-engine.register_converter(".dcm", DICOMToBIDSConverter())
-engine.register_converter(".DCM", DICOMToBIDSConverter())
 
 # Models
 class SuggestMetadataInput(BaseModel):
@@ -96,7 +81,7 @@ class ListVariablesInput(BaseModel):
 
 class QueryGoldInput(BaseModel):
     participants: Optional[List[str]] = Field(default=None, description="Filter by participant IDs, e.g. ['sub-001', 'sub-120']")
-    modalities: Optional[List[str]] = Field(default=None, description="Filter by modality names, e.g. ['eeg', 'genomics']")
+    modalities: Optional[List[str]] = Field(default=None, description="Filter by modality names, e.g. ['genomics']")
     variables: Optional[List[str]] = Field(default=None, description="Filter by variable name substring, e.g. ['SamplingFrequency']")
     exclude_nonstandard: bool = Field(default=False, description="If true, exclude nonstandard_ prefixed columns")
 
@@ -104,23 +89,10 @@ class IngestSubjectInput(BaseModel):
     subject_id: Optional[str] = Field(default=None, description="Specific subject to ingest (e.g. 'sub-120'). If omitted, discovers and ingests ALL subjects.")
     dry_run: bool = Field(default=False, description="If true, only discover and report — don't process.")
 
-class ValidateBIDSInput(BaseModel):
-    subject_id: str = Field(..., description="Subject ID to validate (e.g. 'sub-120')")
-
 class ModalityReportInput(BaseModel):
-    modality: Optional[str] = Field(default=None, description="Filter to a specific modality (e.g. 'eeg', 'functional_mri'). If omitted, reports all.")
+    modality: Optional[str] = Field(default=None, description="Filter to a specific modality (e.g. 'omics', 'wearables'). If omitted, reports all.")
 
-# --- Modality Processing Tools ---
-
-@mcp.tool()
-async def process_imaging(filename: str) -> str:
-    """Processes neuroimaging metadata (JSON/sidecars) using the BIDS plugin."""
-    return await _run_process("bids", filename)
-
-@mcp.tool()
-async def process_fmri_signal(filename: str) -> str:
-    """Processes 4D fMRI NIfTI files and computes BOLD signal amplitudes."""
-    return await _run_process("fmri_signal", filename)
+# --- Clinical Modality Processing Tools ---
 
 @mcp.tool()
 async def process_omics(filename: str) -> str:
@@ -146,16 +118,6 @@ async def process_biospecimens(filename: str) -> str:
 async def process_assessments(filename: str) -> str:
     """Processes clinical surveys and psychometric assessments."""
     return await _run_process("assessments", filename)
-
-@mcp.tool()
-async def process_eeg(filename: str) -> str:
-    """Processes EEG BIDS metadata (JSON)."""
-    return await _run_process("eeg", filename)
-
-@mcp.tool()
-async def process_eeg_signal(filename: str) -> str:
-    """Processes raw EEG signal files (e.g. .set) and computes Global Field Power."""
-    return await _run_process("eeg_signal", filename)
 
 async def _run_process(plugin_name: str, filename: str) -> str:
     try:
@@ -263,7 +225,7 @@ async def gather_variables() -> str:
         logger.exception(f"Error gathering variables: {e}")
         return f"Error: {str(e)}"
 
-# --- NEW: Auto-Discovery & Ingestion ---
+# --- Auto-Discovery & Ingestion ---
 
 @mcp.tool()
 async def ingest_new_subject(params: IngestSubjectInput) -> str:
@@ -282,12 +244,13 @@ async def ingest_new_subject(params: IngestSubjectInput) -> str:
             
             if not params.dry_run:
                 tasks = build_task_list(manifest)
+                
                 if tasks:
                     await asyncio.to_thread(engine.batch_process, tasks)
                     summary["status"] = "processed"
                     summary["tasks_executed"] = len(tasks)
                 else:
-                    summary["status"] = "no_processable_files"
+                    summary["status"] = "no_processable_clinical_files"
             else:
                 summary["status"] = "dry_run"
             
@@ -298,7 +261,7 @@ async def ingest_new_subject(params: IngestSubjectInput) -> str:
         logger.exception(f"Error in ingest_new_subject: {e}")
         return json.dumps({"error": str(e)})
 
-# --- NEW: Gold Tier Query ---
+# --- Gold Tier Query ---
 
 @mcp.tool()
 async def query_gold(params: QueryGoldInput) -> str:
@@ -327,7 +290,7 @@ async def list_modalities() -> str:
     except Exception as e:
         return json.dumps({"error": str(e)})
 
-# --- NEW: Processing Status ---
+# --- Processing Status ---
 
 @mcp.tool()
 async def get_pipeline_status() -> str:
@@ -342,39 +305,7 @@ async def get_pipeline_status() -> str:
         logger.exception(f"Error getting pipeline status: {e}")
         return json.dumps({"error": str(e)})
 
-# --- NEW: BIDS Validation ---
-
-@mcp.tool()
-async def validate_bids(params: ValidateBIDSInput) -> str:
-    """Validate a subject's data for BIDS compliance. Checks filename conventions, required metadata fields, recommended fields, and companion file presence."""
-    try:
-        # Find the subject directory in bronze
-        subject_dir = None
-        for d in engine.bronze_dir.rglob(params.subject_id):
-            if d.is_dir():
-                subject_dir = d.parent if d.name == params.subject_id else d
-                break
-        
-        # Also check for BIDS-style directory structure (sub-XXX/)
-        bids_dir = engine.bronze_dir / "eeg" / params.subject_id
-        if bids_dir.exists():
-            subject_dir = bids_dir
-        
-        if not subject_dir or not subject_dir.exists():
-            # Fall back: scan all files matching this subject
-            all_files = list(engine.bronze_dir.rglob(f"{params.subject_id}*"))
-            if all_files:
-                subject_dir = all_files[0].parent
-            else:
-                return json.dumps({"error": f"Subject {params.subject_id} not found in bronze tier"})
-        
-        report = await asyncio.to_thread(validate_bids_subject, subject_dir, params.subject_id)
-        return json.dumps(report.to_dict(), indent=2)
-    except Exception as e:
-        logger.exception(f"Error validating BIDS: {e}")
-        return json.dumps({"error": str(e)})
-
-# --- NEW: Modality Quality Reports ---
+# --- Modality Quality Reports ---
 
 @mcp.tool()
 async def export_modality_report(params: ModalityReportInput) -> str:
@@ -417,6 +348,8 @@ def get_gold_summary() -> str:
 
 if __name__ == "__main__":
     mcp.run()
+rn "Gold tier not yet generated."
 
-
-
+if __name__ == "__main__":
+    mcp.run()
+mcp.run()

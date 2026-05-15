@@ -32,8 +32,6 @@ STRATUM is an object oriented pipeline (`StratumEngine`) with the following arch
 
 The architecture handles data processing through high-efficiency batching, allowing simultaneous evaluation of data structures.
 
-*   **Neuroimaging (MRI, fMRI, DTI)**: Natively processes 4D NIfTI tensors and DICOM bundles (via `dcm2niix`). Utilizing `nibabel` and `nilearn`, the engine automatically extracts BOLD (Blood-Oxygen-Level-Dependent) time-series metadata and computes functional amplitude variances natively.
-*   **Electrophysiology (EEG/MEG)**: Processes BIDS-native arrays and strictly converts raw EDF/BDF formats into BIDS-compliant sidecars and channel matrices via wrappers (`pyedflib`/`mne`).
 *   **Clinical EHR (FHIR)**: Dynamically parses HL7 FHIR R4 Bundles to securely extract Patient demographics, LOINC-coded diagnostics, ICD-10/SNOMED ontological identifiers, and RxNorm/NDC pharmacokinetic records.
 *   **Multi-Omics (Genomic / Proteomic)**: Standardizes Variant Call Formats (e.g., resolving `rsid` and zygosity) and maps proteomic abundances (UniProt) securely into the cohort timeline.
 *   **Clinical NLP**: Translates subjective, unstructured physician free-text into computable numerical features, extracting ontological identifiers.
@@ -111,6 +109,10 @@ Once attached, the LLM will automatically index STRATUM's 20 multi-modal tools, 
 STRATUM is completely agent-driven. Once your raw clinical files are placed in the appropriate `data/bronze/` subdirectories, simply ask your LLM to ingest the data:
 
 1. **Boot Server**: Make sure the MCP server is attached to LLM (using `uv run --with fastmcp python stratum_server.py`).
+2. **Discover and Ingest**: Ask LLM to run the `ingest_new_subject` tool. STRATUM will automatically scan the Bronze tier, detect the modalities, convert any DICOM/EDF files, and harmonize everything into the Silver tier.
+3. **Generate the Matrix**: Ask your LLM to run `generate_gold_tier` to execute the PII de-identification pipeline and compile the final longitudinal cohort matrix for analysis.
+
+rver**: Make sure the MCP server is attached to LLM (using `uv run --with fastmcp python stratum_server.py`).
 2. **Discover and Ingest**: Ask LLM to run the `ingest_new_subject` tool. STRATUM will automatically scan the Bronze tier, detect the modalities, convert any DICOM/EDF files, and harmonize everything into the Silver tier.
 3. **Generate the Matrix**: Ask your LLM to run `generate_gold_tier` to execute the PII de-identification pipeline and compile the final longitudinal cohort matrix for analysis.
 
