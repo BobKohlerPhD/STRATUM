@@ -50,19 +50,25 @@ class StratumEngine:
             return
             
         plugin = self._plugins[plugin_name]
+        
+        # Ensure silver directory exists
+        self.silver_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Run the harmonizer
+        self.logger.info(f"Processing {plugin_name} from {source_file}...")
+        plugin.run(source_path, output_path)
+        return str(output_path)
 
     def batch_process(self, tasks: List[tuple]):
-        """Asynchronous multi-modal batch ingestion using thread pooling."""
-        self.logger.info(f"Starting parallel batch ingestion of {len(tasks)} items...")
+        """Sequential multi-modal batch ingestion (SQLite requires single-thread access)."""
+        self.logger.info(f"Starting batch ingestion of {len(tasks)} items...")
         results = []
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            future_to_task = {executor.submit(self.process_modality, plugin, source): (plugin, source) for plugin, source in tasks}
-            for future in as_completed(future_to_task):
-                try:
-                    res = future.result()
-                    results.append(res)
-                except Exception as e:
-                    self.logger.error(f"Task failed: {e}")
+        for plugin, source in tasks:
+            try:
+                res = self.process_modality(plugin, source)
+                results.append(res)
+            except Exception as e:
+                self.logger.error(f"Task failed for {plugin} ({source}): {e}")
         return results
 
     def _generate_provenance_hash(self, row: pd.Series) -> str:
@@ -224,6 +230,4 @@ class StratumEngine:
         output_path = self.gold_dir / "gold_multimodal_cohort.csv"
         gold_df.to_csv(output_path, index=False)
         self.logger.info(f"SUCCESS: Generated Gold Tier matrix with shape {gold_df.shape} at {output_path}")
-        return gold_df
-with shape {gold_df.shape} at {output_path}")
         return gold_df

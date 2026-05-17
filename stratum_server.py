@@ -24,9 +24,6 @@ from src.python.plugins.biospecimens import BiospecimenHarmonizer
 from src.python.plugins.clinical_assessments import ClinicalAssessmentHarmonizer
 from src.python.plugins.ehr_fhir import FHIRHarmonizer
 
-# Import Converters
-from src.python.plugins.converter_nibabel import NibabelConverter
-
 # Import Tool Implementations
 from src.python.data_dictionary.registry_integrity_check import check_integrity
 import importlib
@@ -67,9 +64,6 @@ engine.register_plugin("nlp", ClinicalNLPHarmonizer)
 engine.register_plugin("biospecimens", BiospecimenHarmonizer)
 engine.register_plugin("assessments", ClinicalAssessmentHarmonizer)
 engine.register_plugin("ehr_fhir", FHIRHarmonizer)
-
-# Register Converters
-engine.register_converter(".nii", NibabelConverter())
 
 # Models
 class SuggestMetadataInput(BaseModel):
@@ -348,8 +342,3 @@ def get_gold_summary() -> str:
 
 if __name__ == "__main__":
     mcp.run()
-rn "Gold tier not yet generated."
-
-if __name__ == "__main__":
-    mcp.run()
-mcp.run()
